@@ -61,8 +61,7 @@ extension XCUIElementSnapshot {
                 result += " [off-screen, scroll down]"
             }
 
-            // Add frame info only for layout-critical elements
-            result += " frame=\(frame)"
+            result += " center=\(Int(frame.midX.rounded())),\(Int(frame.midY.rounded())) size=\(Int(frame.width.rounded())),\(Int(frame.height.rounded()))"
 
             result += "\n"
         }

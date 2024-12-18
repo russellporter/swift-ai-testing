@@ -8,8 +8,8 @@
 import Foundation
 
 enum TestAction: Decodable {
-    case tap(ElementIdentifier)
-    case type(ElementIdentifier, text: String)
+    case tap(CGPoint)
+    case type(CGPoint, text: String)
     case scroll(CGPoint, offset: CGVector)
     case wait(duration: TimeInterval)
 
@@ -18,7 +18,6 @@ enum TestAction: Decodable {
         case type
         case x
         case y
-        case id
         case durationSecs = "duration_secs"
         case originX = "origin_x"
         case originY = "origin_y"
@@ -34,10 +33,10 @@ enum TestAction: Decodable {
 
         switch type {
         case "tap":
-            self = .tap(try container.decode(ElementIdentifier.self, forKey: .id))
+            self = .tap(CGPoint(x: try container.decode(Double.self, forKey: .x), y: try container.decode(Double.self, forKey: .y)))
         case "type":
             let text = try container.decode(String.self, forKey: .text)
-            self = .type(try container.decode(ElementIdentifier.self, forKey: .id), text: text)
+            self = .type(CGPoint(x: try container.decode(Double.self, forKey: .x), y: try container.decode(Double.self, forKey: .y)), text: text)
         case "wait":
             let secs = try container.decode(TimeInterval.self, forKey: .durationSecs)
             self = .wait(duration: secs)

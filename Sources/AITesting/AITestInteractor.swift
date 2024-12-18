@@ -21,7 +21,8 @@ public actor AITestInteractor {
         var comment: String {
             switch self {
             case .decision(let decision):
-                return decision.comment
+                let actions = decision.actions ?? []
+                return "\(decision.comment). Action: \(actions.map { String(describing: $0) }.joined(separator: ", "))"
             case .failure(let error):
                 return "Interaction error: \(String(describing: error))"
             }
@@ -67,7 +68,7 @@ public actor AITestInteractor {
     }
 
     func performStep(context: AppContext) async throws -> TestResult? {
-        let prompt = promptGenerator.generate(for: context, pastDecisions: interactionHistory.map { $0.comment })
+        let prompt = await promptGenerator.generate(for: context, pastDecisions: interactionHistory.map { $0.comment })
         let image = await context.screenshot.image
 
         await XCTContext.runActivity(named: "Request decision") { activity in
@@ -79,8 +80,8 @@ public actor AITestInteractor {
             imageAttachment.name = "Image"
             activity.add(imageAttachment)
         }
-        // Scale image based on pixel density
-        let downscaledImage = includingImage ? image.scaled(scale: 1.0 / image.scale) : nil
+        // Downscale the image to non-retina resolution
+        let downscaledImage = includingImage ? image.resized(scale: 1) : nil
         let decision = try await modelInteractor.perform(prompt: prompt, image: downscaledImage, promptResponseType: TestDecision.self)
 
         interactionHistory.append(.decision(decision))
@@ -114,10 +115,10 @@ public actor AITestInteractor {
     func performAction(_ action: TestAction, context: AppContext) async throws {
         logger.info("Performing action: \(String(describing: action))")
         switch action {
-        case .tap(let id):
-            try await appInteractor.tap(id)
-        case .type(let id, text: let text):
-            try await appInteractor.type(text: text.applySubstitutions(context.textSubstitutions), id)
+        case .tap(let position):
+            try await appInteractor.tap(at: position)
+        case .type(let position, text: let text):
+            try await appInteractor.type(text: text.applySubstitutions(context.textSubstitutions), at: position)
         case .scroll(let point, let offset):
             await appInteractor.scroll(from: point, offset: offset)
         case .wait(duration: let duration):

@@ -9,11 +9,11 @@ import Foundation
 import UIKit
 
 extension UIImage {
-    func scaled(scale: Double) -> UIImage {
-        let scaledSize = CGSize(width: size.width / scale, height: size.height / scale)
-        // Scale image
-        let scaledImage = UIGraphicsImageRenderer(size: scaledSize).image { _ in
-            draw(in: CGRect(origin: .zero, size: scaledSize))
+    func resized(scale: Double) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        let scaledImage = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            draw(in: CGRect(origin: .zero, size: size))
         }
         return scaledImage
     }

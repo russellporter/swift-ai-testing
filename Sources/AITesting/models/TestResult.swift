@@ -6,6 +6,6 @@
 //
 
 public enum TestResult: String, Codable, Sendable {
-    case pass = "pass"
-    case fail = "fail"
+    case pass
+    case fail
 }

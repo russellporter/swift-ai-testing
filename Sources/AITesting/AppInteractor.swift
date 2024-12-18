@@ -7,15 +7,10 @@
 
 import XCTest
 
-enum AppInteractionError: Error {
-    case elementNotFound(ElementIdentifier)
-    case elementNotHittable(ElementIdentifier)
-}
-
 @MainActor
 public protocol AppInteractor: Sendable {
-    func tap(_ id: ElementIdentifier) throws
-    func type(text: String, _ id: ElementIdentifier) throws
+    func tap(at position: CGPoint) throws
+    func type(text: String, at position: CGPoint) throws
     func scroll(from point: CGPoint, offset: CGVector)
     func wait(duration: TimeInterval)
 }
@@ -28,16 +23,12 @@ open class StandardAppInteractor: AppInteractor {
         self.app = app
     }
 
-    open func tap(_ id: ElementIdentifier) throws {
-        let element = app[id]
-        guard element.exists else { throw AppInteractionError.elementNotFound(id) }
-        guard element.isHittable else { throw AppInteractionError.elementNotHittable(id) }
-
-        app[id].tap()
+    open func tap(at position: CGPoint) throws {
+        app.coordinate(withAbsolutePosition: position).tap()
     }
 
-    open func type(text: String, _ id: ElementIdentifier) throws {
-        try tap(id)
+    open func type(text: String, at position: CGPoint) throws {
+        try tap(at: position)
         app.typeText(text)
     }
 
@@ -51,11 +42,5 @@ open class StandardAppInteractor: AppInteractor {
 
     open func wait(duration: TimeInterval) {
         Thread.sleep(forTimeInterval: duration)
-    }
-}
-
-extension XCUIApplication {
-    subscript(id: ElementIdentifier) -> XCUIElement {
-        self.descendants(matching: .any).matching(identifier: id.idOrLabel).firstMatch
     }
 }

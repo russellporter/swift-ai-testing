@@ -165,7 +165,8 @@ public actor AnthropicModelInteractor: ModelInteractor {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
-            throw AnthropicError(message: "Error: HTTP \(httpResponse.statusCode)")
+            let body = String(data: data, encoding: .utf8)
+            throw AnthropicError(message: "Error: HTTP \(httpResponse.statusCode). Body: \(body ?? "")")
         }
 
         let json: String
