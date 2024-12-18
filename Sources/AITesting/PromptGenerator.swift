@@ -6,6 +6,7 @@
 //
 
 struct PromptGenerator {
+    // TODO: implement output format as an Anthropic tool instead
     @MainActor
     func generate(for context: AppContext, pastDecisions: [String]) -> String {
         """
@@ -24,28 +25,29 @@ struct PromptGenerator {
               "oneOf": [
                 {
                   "type": "object",
+                  "description": "Tap on an element at the given coordinates",
                   "properties": {
-                    "type": "tap",
-                    "x": "number", "y": number /* coordinates of the element to tap */
+                    "type": "tap", "x": "number", "y": number
                   }
                 },
                 {
                   "type": "object",
+                  "description": "Type text in a text field at the given coordinates. Only possible for \"textField\" and \"textView\" elements.",
                   "properties": {
-                    "type": "type", // Type text - only possible for "textField" and "textView" elements.
-                    "x": "number", "y": number /* coordinates of the text field element */,
-                    "text": "string"
+                    "type": "type", "x": "number", "y": number, "text": "string"
                   }
                 },
                 {
                   "type": "object",
-                  "properties": { "type": "wait", "duration_secs": "number" }  // Pause execution
+                  "description": "Wait a given number of seconds.",
+                  "properties": { "type": "wait", "duration_secs": "number" }
                 },
                 {
                   "type": "object",
+                  "description": "Scroll the screen, starting from the given origin, and with the given offset.",
                   "properties": { 
                     "type": "scroll",
-                    "origin_x": "number", "origin_y": "number", "offset_x": "number", "offset_y": "number"  // Scroll coordinates
+                    "origin_x": "number", "origin_y": "number", "offset_x": "number", "offset_y": "number"
                   }
                 }
               ]
@@ -56,7 +58,7 @@ struct PromptGenerator {
         </outputFormat>
         
         <rules>
-        - You must output JSON with the format specified above.
+        - You must output valid JSON with the format specified above.
         - Only output a result if the test is completely finished or has obviously failed. Otherwise keep trying to take actions.
         - You are only allowed to take one action.
         - If the test looks to have failed. Wait for 10 seconds and confirm the decision, in case something was just loading.

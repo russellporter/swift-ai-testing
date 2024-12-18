@@ -185,7 +185,10 @@ public actor AnthropicModelInteractor: ModelInteractor {
             return promptResponse
         } catch {
             logger.error("Failed to decode prompt response: \(json) \(error)")
-            throw error
+
+            // TODO: remove once using a "tool" to specify output
+            // Let the model try again to output a correct response.
+            return try await perform(prompt: prompt, image: image, promptResponseType: promptResponseType, tries: tries - 1)
         }
     }
 }
